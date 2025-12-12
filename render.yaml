@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: young-money-tasks
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: BACKEND_API_URL
+        value: https://pixassistindo.thm.app.br
+      - key: RAILWAY_API_URL
+        value: https://monetag-postback-server-production.up.railway.app
