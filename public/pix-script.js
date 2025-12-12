@@ -657,9 +657,9 @@ class PixAssistindoManager {
             }
         };
         
-        // Atualizar imediatamente e depois a cada 1 minuto
+        // Atualizar imediatamente e depois a cada 15 minutos
         updateTimer();
-        this.timerIntervalId = setInterval(updateTimer, 60000); // 60000ms = 1 minuto
+        this.timerIntervalId = setInterval(updateTimer, 900000); // 900000ms = 15 minutos
     }
 
     updateUI() {
