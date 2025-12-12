@@ -1,5 +1,8 @@
 class PixAssistindoManager {
     constructor() {
+        // Inicializar sistema de segurança de sessão única
+        this.sessionSecurity = new SessionSecurity();
+        
         // Validar acesso antes de inicializar
         this.validateAccess();
         
@@ -16,6 +19,9 @@ class PixAssistindoManager {
         this.rewardsConfig = null;
         this.sessionStartTime = Date.now();
         this.timerIntervalId = null;
+        
+        // Inicializar segurança de sessão
+        this.initializeSessionSecurity();
         
         this.initializeElements();
         this.startSessionTimer();
@@ -674,6 +680,20 @@ class PixAssistindoManager {
             this.statusDot.className = 'status-dot stopped';
             this.statusText.textContent = 'Parado';
         }
+    }
+
+    async initializeSessionSecurity() {
+        console.log('[SECURITY] Inicializando segurança de sessão...');
+        
+        const initialized = await this.sessionSecurity.initialize();
+        
+        if (!initialized) {
+            console.log('[SECURITY] ❌ Falha ao inicializar segurança - acesso bloqueado');
+            // O SessionSecurity já bloqueou o acesso
+            throw new Error('Sessão bloqueada');
+        }
+        
+        console.log('[SECURITY] ✅ Segurança de sessão ativada');
     }
 
     async validateAccess() {
