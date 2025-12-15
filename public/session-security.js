@@ -4,10 +4,11 @@
  */
 
 class SessionSecurity {
-    constructor() {
+    constructor(prefix = 'default') {
         this.tabId = this.generateTabId();
-        this.sessionKey = 'pix_active_session';
-        this.heartbeatKey = 'pix_session_heartbeat';
+        this.prefix = prefix;
+        this.sessionKey = `${prefix}_active_session`;
+        this.heartbeatKey = `${prefix}_session_heartbeat`;
         this.heartbeatInterval = null;
         this.checkInterval = null;
         this.isActive = false;

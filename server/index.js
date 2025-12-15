@@ -36,140 +36,276 @@ app.use((req, res, next) => {
   next();
 });
 
-// API Proxy Routes for Pix Assistindo Backend
-const BACKEND_API_URL = process.env.BACKEND_API_URL || 'https://pixassistindo.thm.app.br';
-const RAILWAY_API_URL = process.env.RAILWAY_API_URL || 'https://monetag-postback-server-production.up.railway.app';
+// ========== PROXY PARA PIX ASSISTINDO ==========
+const PIX_ASSISTINDO_URL = 'https://pixassistindo.thm.app.br/backend';
 
-// Proxy: Buscar Usuário
-app.post('/api/buscar_usuario', async (req, res) => {
-  try {
-    console.log('[PROXY] Buscando usuário:', req.body.email);
-    
-    const response = await axios.post(
-      `${BACKEND_API_URL}/backend/buscar_usuario.php`,
-      req.body,
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Host': 'pixassistindo.thm.app.br',
-          'User-Agent': 'okhttp/4.11.0'
-        }
-      }
-    );
-    
-    console.log('[PROXY] Resposta recebida:', response.status);
-    res.json(response.data);
-  } catch (error) {
-    console.error('[PROXY] Erro ao buscar usuário:', error.message);
-    res.status(error.response?.status || 500).json({
-      error: 'Erro ao buscar usuário',
-      message: error.message
-    });
-  }
-});
-
-// Proxy: Atualizar Usuário
-app.post('/api/atualizar_usuario', async (req, res) => {
-  try {
-    console.log('[PROXY] Atualizando usuário:', req.body.id);
-    
-    const response = await axios.post(
-      `${BACKEND_API_URL}/backend/atualizar_usuario.php`,
-      req.body,
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Host': 'pixassistindo.thm.app.br',
-          'User-Agent': 'okhttp/4.11.0'
-        }
-      }
-    );
-    
-    console.log('[PROXY] Usuário atualizado com sucesso');
-    res.json(response.data);
-  } catch (error) {
-    console.error('[PROXY] Erro ao atualizar usuário:', error.message);
-    res.status(error.response?.status || 500).json({
-      error: 'Erro ao atualizar usuário',
-      message: error.message
-    });
-  }
-});
-
-// Proxy: Atualizar Missão
-app.post('/api/atualizar_missao', async (req, res) => {
-  try {
-    console.log('[PROXY] Atualizando missão para:', req.body.email);
-    
-    const response = await axios.post(
-      `${BACKEND_API_URL}/backend/atualizar_missao.php`,
-      req.body,
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Host': 'pixassistindo.thm.app.br',
-          'User-Agent': 'okhttp/4.11.0'
-        }
-      }
-    );
-    
-    console.log('[PROXY] Missão atualizada com sucesso');
-    res.json(response.data);
-  } catch (error) {
-    console.error('[PROXY] Erro ao atualizar missão:', error.message);
-    res.status(error.response?.status || 500).json({
-      error: 'Erro ao atualizar missão',
-      message: error.message
-    });
-  }
-});
-
-// Proxy: Obter Configurações de Missão
+// Proxy: Get Config Missao (Pix Assistindo)
 app.get('/api/get_config_missao', async (req, res) => {
   try {
-    console.log('[PROXY] Obtendo configurações de missão');
+    console.log('[PIX PROXY] Obtendo configurações de missão...');
+    const response = await axios.get(`${PIX_ASSISTINDO_URL}/get_config_missao.php`, {
+      headers: { 'User-Agent': 'okhttp/4.11.0' }
+    });
+    console.log('[PIX PROXY] Configurações obtidas com sucesso');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PIX PROXY] Erro ao obter configurações:', error.message);
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});
+
+// Proxy: Buscar Usuario (Pix Assistindo)
+app.post('/api/buscar_usuario', async (req, res) => {
+  try {
+    console.log('[PIX PROXY] Buscando usuário...');
+    const response = await axios.post(`${PIX_ASSISTINDO_URL}/buscar_usuario.php`, req.body, {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'User-Agent': 'okhttp/4.11.0'
+      }
+    });
+    console.log('[PIX PROXY] Usuário encontrado');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PIX PROXY] Erro ao buscar usuário:', error.message);
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});
+
+// Proxy: Atualizar Usuario (Pix Assistindo)
+app.post('/api/atualizar_usuario', async (req, res) => {
+  try {
+    console.log('[PIX PROXY] Atualizando usuário...');
+    const response = await axios.post(`${PIX_ASSISTINDO_URL}/atualizar_usuario.php`, req.body, {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'User-Agent': 'okhttp/4.11.0'
+      }
+    });
+    console.log('[PIX PROXY] Usuário atualizado');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PIX PROXY] Erro ao atualizar usuário:', error.message);
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});
+
+// Proxy: Atualizar Missao (Pix Assistindo)
+app.post('/api/atualizar_missao', async (req, res) => {
+  try {
+    console.log('[PIX PROXY] Atualizando missão...');
+    const response = await axios.post(`${PIX_ASSISTINDO_URL}/atualizar_missao.php`, req.body, {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'User-Agent': 'okhttp/4.11.0'
+      }
+    });
+    console.log('[PIX PROXY] Missão atualizada');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PIX PROXY] Erro ao atualizar missão:', error.message);
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});
+
+// ========== PROXY PARA GRANINHA BOT ==========
+const GRANINHA_API_URL = process.env.GRANINHA_API_URL || 'https://painel.graninha.com.br/api/v1';
+
+// Proxy genérico para API Graninha (aceita qualquer endpoint)
+app.post('/api/:endpoint', async (req, res) => {
+  try {
+    const { endpoint } = req.params;
+    const { bearer_token, data } = req.body;
     
-    const response = await axios.get(
-      `${BACKEND_API_URL}/backend/get_config_missao.php`,
+    console.log(`[PROXY] Requisição para ${endpoint}`);
+    
+    const response = await axios.post(
+      `${GRANINHA_API_URL}/${endpoint}`,
+      data,
       {
         headers: {
-          'Host': 'pixassistindo.thm.app.br',
-          'User-Agent': 'okhttp/4.11.0'
+          'accept': 'application/json',
+          'authorization': `Bearer ${bearer_token}`,
+          'content-type': 'application/x-www-form-urlencoded',
+          'user-agent': 'okhttp/4.12.0'
         }
       }
     );
     
-    console.log('[PROXY] Configurações obtidas com sucesso');
+    console.log(`[PROXY] ${endpoint} - sucesso`);
     res.json(response.data);
   } catch (error) {
-    console.error('[PROXY] Erro ao obter configurações:', error.message);
+    console.error(`[PROXY] Erro em ${req.params.endpoint}:`, error.message);
     res.status(error.response?.status || 500).json({
-      error: 'Erro ao obter configurações',
+      error: 'Erro na requisição',
       message: error.message
     });
   }
 });
 
-// Proxy: Stats do Usuário (Railway)
-app.get('/api/stats/user/:userId', async (req, res) => {
+// Proxy: Get User Info (mantido para compatibilidade)
+app.post('/api/get_user_old', async (req, res) => {
   try {
-    const { userId } = req.params;
-    console.log('[PROXY] Obtendo stats do usuário:', userId);
+    console.log('[PROXY] Obtendo informações do usuário');
     
-    const response = await axios.get(
-      `${RAILWAY_API_URL}/api/stats/user/${userId}`
+    const response = await axios.post(
+      `${GRANINHA_API_URL}/get_user`,
+      req.body,
+      {
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'User-Agent': 'okhttp/4.11.0'
+        }
+      }
     );
     
-    console.log('[PROXY] Stats obtidos com sucesso');
+    console.log('[PROXY] Usuário obtido com sucesso');
     res.json(response.data);
   } catch (error) {
-    console.error('[PROXY] Erro ao obter stats:', error.message);
+    console.error('[PROXY] Erro ao obter usuário:', error.message);
     res.status(error.response?.status || 500).json({
-      error: 'Erro ao obter stats',
+      error: 'Erro ao obter usuário',
       message: error.message
     });
   }
 });
+
+// Proxy: Play Scratch Card (Raspadinha)
+app.post('/api/play_scratch', async (req, res) => {
+  try {
+    console.log('[PROXY] Jogando raspadinha');
+    
+    const response = await axios.post(
+      `${GRANINHA_API_URL}/play_scratch`,
+      req.body,
+      {
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'User-Agent': 'okhttp/4.11.0'
+        }
+      }
+    );
+    
+    console.log('[PROXY] Raspadinha jogada com sucesso');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PROXY] Erro ao jogar raspadinha:', error.message);
+    res.status(error.response?.status || 500).json({
+      error: 'Erro ao jogar raspadinha',
+      message: error.message
+    });
+  }
+});
+
+// Proxy: Play Roulette (Roleta)
+app.post('/api/play_roulette', async (req, res) => {
+  try {
+    console.log('[PROXY] Jogando roleta');
+    
+    const response = await axios.post(
+      `${GRANINHA_API_URL}/play_roulette`,
+      req.body,
+      {
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'User-Agent': 'okhttp/4.11.0'
+        }
+      }
+    );
+    
+    console.log('[PROXY] Roleta jogada com sucesso');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PROXY] Erro ao jogar roleta:', error.message);
+    res.status(error.response?.status || 500).json({
+      error: 'Erro ao jogar roleta',
+      message: error.message
+    });
+  }
+});
+
+// Proxy: Play Quiz
+app.post('/api/play_quiz', async (req, res) => {
+  try {
+    console.log('[PROXY] Respondendo quiz');
+    
+    const response = await axios.post(
+      `${GRANINHA_API_URL}/play_quiz`,
+      req.body,
+      {
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'User-Agent': 'okhttp/4.11.0'
+        }
+      }
+    );
+    
+    console.log('[PROXY] Quiz respondido com sucesso');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PROXY] Erro ao responder quiz:', error.message);
+    res.status(error.response?.status || 500).json({
+      error: 'Erro ao responder quiz',
+      message: error.message
+    });
+  }
+});
+
+// Proxy: Play Game
+app.post('/api/play_game', async (req, res) => {
+  try {
+    console.log('[PROXY] Jogando game:', req.body.game_id);
+    
+    const response = await axios.post(
+      `${GRANINHA_API_URL}/play_game`,
+      req.body,
+      {
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'User-Agent': 'okhttp/4.11.0'
+        }
+      }
+    );
+    
+    console.log('[PROXY] Game jogado com sucesso');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PROXY] Erro ao jogar game:', error.message);
+    res.status(error.response?.status || 500).json({
+      error: 'Erro ao jogar game',
+      message: error.message
+    });
+  }
+});
+
+// Proxy: Get Spin (Roleta)
+app.post('/api/get_spin', async (req, res) => {
+  try {
+    console.log('[PROXY] Obtendo spin da roleta');
+    
+    const response = await axios.post(
+      `${GRANINHA_API_URL}/get_spin`,
+      req.body,
+      {
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'User-Agent': 'okhttp/4.11.0'
+        }
+      }
+    );
+    
+    console.log('[PROXY] Spin obtido com sucesso');
+    res.json(response.data);
+  } catch (error) {
+    console.error('[PROXY] Erro ao obter spin:', error.message);
+    res.status(error.response?.status || 500).json({
+      error: 'Erro ao obter spin',
+      message: error.message
+    });
+  }
+});
+
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -180,9 +316,28 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve arquivos HTML específicos (pix-assistindo, etc.)
+app.get('/pix-assistindo.html', (req, res) => {
+  res.sendFile(path.join(publicPath, 'pix-assistindo.html'));
+});
+
+app.get('/pix-assistindo', (req, res) => {
+  res.sendFile(path.join(publicPath, 'pix-assistindo.html'));
+});
+
 // Serve index.html for all other routes (SPA support)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(publicPath, 'index.html'));
+  // Se for um arquivo que existe, servir ele
+  const requestedPath = path.join(publicPath, req.path);
+  if (req.path.endsWith('.html') || req.path.endsWith('.js') || req.path.endsWith('.css')) {
+    res.sendFile(requestedPath, (err) => {
+      if (err) {
+        res.sendFile(path.join(publicPath, 'index.html'));
+      }
+    });
+  } else {
+    res.sendFile(path.join(publicPath, 'index.html'));
+  }
 });
 
 // Error handling middleware
@@ -196,10 +351,11 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`\n🚀 Young Money Tasks Server`);
+  console.log(`\n🚀 Graninha Bot Server`);
   console.log(`📍 Running on http://localhost:${PORT}`);
   console.log(`🔧 Environment: ${NODE_ENV}`);
   console.log(`🌐 CORS enabled for: ${process.env.CORS_ORIGIN || '*'}`);
+  console.log(`🤖 Backend API: ${GRANINHA_API_URL}`);
   console.log(`\n✅ Server ready to accept connections\n`);
 });
 

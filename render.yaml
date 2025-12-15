@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: young-money-tasks
+    name: graninha-bot-render
     env: node
     plan: free
     buildCommand: npm install
@@ -12,7 +12,5 @@ services:
         value: 3000
       - key: CORS_ORIGIN
         value: "*"
-      - key: BACKEND_API_URL
-        value: https://pixassistindo.thm.app.br
-      - key: RAILWAY_API_URL
-        value: https://monetag-postback-server-production.up.railway.app
+      - key: GRANINHA_API_URL
+        value: https://painel.graninha.com.br/api/v1

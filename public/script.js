@@ -90,34 +90,6 @@ class PixAssistindoManager {
 
     loadSettings() {
         try {
-            // Primeiro, verificar parâmetros da URL (vindos do login-tarefa)
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlId = urlParams.get('id');
-            const urlEmail = urlParams.get('email');
-            
-            // Se tiver ID na URL, buscar email do localStorage ou usar o email da URL
-            if (urlId) {
-                console.log('[PIX ASSISTINDO] ID recebido da URL:', urlId);
-                // Salvar o ID para uso posterior
-                localStorage.setItem('pix_user_id', urlId);
-                
-                // Se tiver email na URL, usar ele
-                if (urlEmail) {
-                    this.emailInput.value = urlEmail;
-                    console.log('[PIX ASSISTINDO] Email recebido da URL:', urlEmail);
-                    return; // Não carregar do localStorage
-                }
-                
-                // Tentar buscar email do localStorage (salvo pelo login)
-                const savedEmail = localStorage.getItem('user_email');
-                if (savedEmail) {
-                    this.emailInput.value = savedEmail;
-                    console.log('[PIX ASSISTINDO] Email carregado do localStorage:', savedEmail);
-                    return;
-                }
-            }
-            
-            // Fallback: carregar configurações salvas
             const settings = JSON.parse(localStorage.getItem('pixAssistindoSettings') || '{}');
             if (settings.email) this.emailInput.value = settings.email;
             if (settings.tipoAnuncio) this.tipoAnuncioSelect.value = settings.tipoAnuncio;
@@ -160,25 +132,11 @@ class PixAssistindoManager {
                 this.updateRewardsDisplay(config);
                 this.addLog('success', '✅ Configurações de recompensa carregadas');
             } else {
-                // Usar valores padrão
-                this.useDefaultRewardsConfig();
+                this.addLog('warning', '⚠️ Não foi possível carregar configurações de recompensa');
             }
         } catch (error) {
-            // Usar valores padrão em caso de erro
-            console.log('Usando configurações padrão:', error.message);
-            this.useDefaultRewardsConfig();
+            this.addLog('error', `❌ Erro ao carregar configurações: ${error.message}`);
         }
-    }
-
-    useDefaultRewardsConfig() {
-        this.rewardsConfig = {
-            rewarded_min: 0.001,
-            rewarded_max: 0.005,
-            interstitial_value: 0.002,
-            mission_goal: 0.50
-        };
-        this.updateRewardsDisplay(this.rewardsConfig);
-        this.addLog('info', '⚙️ Usando configurações padrão de recompensa');
     }
 
     async start() {
@@ -331,6 +289,7 @@ class PixAssistindoManager {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=UTF-8',
+                    'Host': 'pixassistindo.thm.app.br',
                     'User-Agent': 'okhttp/4.11.0'
                 },
                 body: JSON.stringify({ email: email })
@@ -352,6 +311,7 @@ class PixAssistindoManager {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=UTF-8',
+                    'Host': 'pixassistindo.thm.app.br',
                     'User-Agent': 'okhttp/4.11.0'
                 },
                 body: JSON.stringify({
@@ -377,6 +337,7 @@ class PixAssistindoManager {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=UTF-8',
+                    'Host': 'pixassistindo.thm.app.br',
                     'User-Agent': 'okhttp/4.11.0'
                 },
                 body: JSON.stringify({
@@ -400,6 +361,7 @@ class PixAssistindoManager {
             const response = await fetch('/api/get_config_missao', {
                 method: 'GET',
                 headers: {
+                    'Host': 'pixassistindo.thm.app.br',
                     'User-Agent': 'okhttp/4.11.0'
                 }
             });

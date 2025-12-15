@@ -1,7 +1,7 @@
 {
-  "name": "young-money-tasks",
+  "name": "graninha-bot-render",
   "version": "1.0.0",
-  "description": "Young Money Tasks - Plataforma de Tarefas e Monetização",
+  "description": "Graninha Bot - Automação 100% Legit com Simulação de Vídeos",
   "main": "server/index.js",
   "type": "module",
   "scripts": {
@@ -10,10 +10,10 @@
     "build": "echo 'Build complete'"
   },
   "keywords": [
-    "tasks",
-    "monetization",
-    "pix",
-    "young-money"
+    "graninha",
+    "bot",
+    "automation",
+    "render"
   ],
   "author": "",
   "license": "MIT",

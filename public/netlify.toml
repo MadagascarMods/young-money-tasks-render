@@ -1,3 +1,45 @@
+[build]
+  command = "echo 'Build complete!'"
+  publish = "."
+
+# Redirects para APIs do Pix Assistindo (devem vir ANTES do redirect genérico)
+[[redirects]]
+  from = "/api/buscar_usuario"
+  to = "https://pixassistindo.thm.app.br/backend/buscar_usuario.php"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/atualizar_usuario"
+  to = "https://pixassistindo.thm.app.br/backend/atualizar_usuario.php"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/atualizar_missao"
+  to = "https://pixassistindo.thm.app.br/backend/atualizar_missao.php"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/get_config_missao"
+  to = "https://pixassistindo.thm.app.br/backend/get_config_missao.php"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/configuracoes"
+  to = "https://pixassistindo.thm.app.br/backend/configuracoes.php"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/get_cpm"
+  to = "https://pixassistindo.thm.app.br/backend/get_cpm.php"
+  status = 200
+  force = true
+
+# Redirect genérico para APIs do Graninha/Monetag (vem por último)
 [[redirects]]
   from = "/api/*"
   to = "https://monetag-postback-server-production.up.railway.app/api/:splat"

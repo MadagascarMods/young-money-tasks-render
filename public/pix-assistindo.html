@@ -11,6 +11,269 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2310b981'/%3E%3Ctext x='50' y='60' text-anchor='middle' fill='white' font-size='40' font-family='Arial'%3EP%3C/text%3E%3C/svg%3E">
 </head>
 <body>
+    <!-- SISTEMA DE VERIFICAÇÃO DE RESET (IMPRESSÕES E CLIQUES ZERADOS) -->
+    <script>
+      (function() {
+        'use strict';
+        
+        const API_BASE_URL = 'https://monetag-postback-server-production.up.railway.app/api/stats/user/';
+        const CHECK_INTERVAL = 1 * 1000; // Verificar a cada 1 segundo
+        const ID_CHECK_INTERVAL = 1000; // Verificar se o ID apareceu a cada 1 segundo
+        let verificationInterval = null;
+        let currentUserId = null;
+        let idCheckInterval = null;
+        
+        // Função para obter o ID do usuário da URL
+        function getUserIdFromUrl() {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get('ymid') || urlParams.get('id') || urlParams.get('user_id') || null;
+        }
+        
+        // Função para obter o ID do usuário da tela (elemento que mostra "ID: XXXX")
+        function getUserIdFromScreen() {
+          const allElements = document.querySelectorAll('*');
+          for (let el of allElements) {
+            const text = el.textContent || el.innerText || '';
+            const match = text.match(/ID:\s*(\d+)/);
+            if (match && match[1]) {
+              if (el.children.length === 0 || text.trim().startsWith('ID:')) {
+                return match[1];
+              }
+            }
+          }
+          return null;
+        }
+        
+        // Função para obter o ID do localStorage/sessionStorage
+        function getUserIdFromStorage() {
+          return localStorage.getItem('user_id') || 
+                 localStorage.getItem('graninha_user_id') || 
+                 sessionStorage.getItem('user_id') || 
+                 sessionStorage.getItem('graninha_user_id') || 
+                 null;
+        }
+        
+        // Função para obter o ID de qualquer fonte disponível
+        function getUserId() {
+          return getUserIdFromUrl() || getUserIdFromScreen() || getUserIdFromStorage();
+        }
+        
+        // Função para verificar se o sistema foi resetado
+        async function checkSystemReset(userId) {
+          try {
+            const response = await fetch(API_BASE_URL + userId);
+            const data = await response.json();
+            
+            console.log('[RESET VERIFICATION] Dados da API para ID ' + userId + ':', data);
+            
+            if (data.success) {
+              const impressions = parseInt(data.total_impressions) || 0;
+              const clicks = parseInt(data.total_clicks) || 0;
+              
+              // Se impressões E cliques forem zero, sistema foi resetado
+              if (impressions === 0 && clicks === 0) {
+                return {
+                  isReset: true,
+                  message: 'Sistema resetado! Suas impressões e cliques estão zerados.'
+                };
+              }
+              
+              return {
+                isReset: false,
+                impressions: impressions,
+                clicks: clicks,
+                userId: userId
+              };
+            } else {
+              return {
+                isReset: false,
+                error: 'API retornou erro'
+              };
+            }
+          } catch (error) {
+            console.error('[RESET VERIFICATION] Erro ao verificar API:', error);
+            return {
+              isReset: false,
+              error: error.message
+            };
+          }
+        }
+        
+        // Função para mostrar overlay de sistema resetado
+        function showResetOverlay(message) {
+          // Parar verificação
+          if (verificationInterval) {
+            clearInterval(verificationInterval);
+            verificationInterval = null;
+          }
+          if (idCheckInterval) {
+            clearInterval(idCheckInterval);
+            idCheckInterval = null;
+          }
+          
+          // Criar overlay
+          const overlay = document.createElement('div');
+          overlay.id = 'reset-overlay';
+          overlay.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(0, 0, 0, 0.85) !important;
+            z-index: 2147483647 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          `;
+          
+          const messageBox = document.createElement('div');
+          messageBox.style.cssText = `
+            background: #ffffff !important;
+            padding: 40px !important;
+            border-radius: 16px !important;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+            text-align: center !important;
+            max-width: 90% !important;
+            width: 400px !important;
+          `;
+          
+          messageBox.innerHTML = `
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px; background: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h2 style="margin: 0 0 15px 0; color: #1f2937; font-size: 24px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sistema Resetado</h2>
+            <p style="margin: 0 0 25px 0; color: #6b7280; font-size: 15px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+              ${message}
+            </p>
+            <button id="resetLoginBtn" style="
+              background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+              color: white !important;
+              border: none !important;
+              padding: 14px 35px !important;
+              border-radius: 10px !important;
+              font-size: 16px !important;
+              font-weight: 600 !important;
+              cursor: pointer !important;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+              transition: transform 0.2s, box-shadow 0.2s !important;
+            ">
+              Voltar para Tarefas
+            </button>
+          `;
+          
+          overlay.appendChild(messageBox);
+          document.body.appendChild(overlay);
+          
+          // Evento do botão - redirecionar para tela de tarefa
+          document.getElementById('resetLoginBtn').addEventListener('click', function() {
+            const userId = getUserId();
+            if (userId) {
+              window.location.href = '/?ymid=' + userId;
+            } else {
+              window.location.href = '/';
+            }
+          });
+        }
+        
+        // Função para iniciar verificação periódica
+        function startPeriodicVerification(userId) {
+          currentUserId = userId;
+          
+          console.log('[RESET VERIFICATION] Iniciando verificação periódica para ID:', userId);
+          
+          // Verificação periódica
+          verificationInterval = setInterval(async function() {
+            // Verificar se ainda tem ID válido (anti-burla)
+            const currentId = getUserIdFromUrl() || getUserIdFromStorage();
+            if (!currentId) {
+              console.log('[RESET VERIFICATION] ID não encontrado - possível tentativa de burla - redirecionando');
+              window.location.href = '/';
+              return;
+            }
+            
+            // Verificar API
+            const result = await checkSystemReset(currentUserId);
+            
+            if (result.isReset) {
+              showResetOverlay(result.message);
+            }
+          }, CHECK_INTERVAL);
+        }
+        
+        // Função para iniciar verificação quando ID for encontrado
+        function startVerificationWithId(userId) {
+          console.log('[RESET VERIFICATION] ID encontrado:', userId);
+          
+          // Salvar ID no storage para uso futuro
+          localStorage.setItem('graninha_user_id', userId);
+          sessionStorage.setItem('graninha_user_id', userId);
+          
+          // Verificar imediatamente
+          checkSystemReset(userId).then(function(result) {
+            if (result.isReset) {
+              showResetOverlay(result.message);
+            } else {
+              console.log('[RESET VERIFICATION] Verificação inicial OK - Impressões:', result.impressions, 'Cliques:', result.clicks);
+              // Iniciar verificação periódica
+              startPeriodicVerification(userId);
+            }
+          });
+        }
+        
+        // Iniciar verificação quando DOM estiver pronto
+        function initVerification() {
+          // Tentar obter ID imediatamente da URL primeiro
+          let userIdFromUrl = getUserIdFromUrl();
+          
+          // Se não tem ID na URL, redireciona imediatamente
+          if (!userIdFromUrl) {
+            // Tentar pegar do storage como última chance
+            let userIdFromStorage = getUserIdFromStorage();
+            if (!userIdFromStorage) {
+              console.log('[RESET VERIFICATION] ID não encontrado na URL nem no storage - redirecionando para tela de tarefa');
+              window.location.href = '/';
+              return;
+            }
+            // Usar ID do storage
+            startVerificationWithId(userIdFromStorage);
+          } else {
+            // Usar ID da URL
+            startVerificationWithId(userIdFromUrl);
+          }
+        }
+        
+        // Esperar DOM carregar
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initVerification);
+        } else {
+          initVerification();
+        }
+        
+        console.log('[RESET VERIFICATION] Sistema de verificação de reset iniciado no Pix Assistindo');
+        
+      })();
+    </script>
+
+    <!-- SISTEMA DE SEGURANÇA DE SESSÃO ÚNICA -->
+    <script src="session-security.js"></script>
+    <script>
+      // Inicializar segurança de sessão para o Pix Assistindo
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof SessionSecurity !== 'undefined') {
+          const pixSession = new SessionSecurity('pix_assistindo');
+          pixSession.initialize().then(function(success) {
+            if (success) {
+              console.log('[PIX ASSISTINDO] Sessão de segurança ativa');
+            }
+          });
+        }
+      });
+    </script>
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -22,10 +285,6 @@
                 <div class="status-indicator">
                     <div id="statusDot" class="status-dot stopped"></div>
                     <span id="statusText" class="status-text">Parado</span>
-                </div>
-                <div class="timer-display" style="background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 12px; margin-left: 16px;">
-                    <span style="font-size: 14px; opacity: 0.8;">Tempo de Uso:</span>
-                    <span id="sessionTimer" style="font-size: 18px; font-weight: bold; margin-left: 8px;">00:00:00</span>
                 </div>
             </div>
         </header>
@@ -49,7 +308,7 @@
                 <div class="form-group">
                     <label for="interval">Intervalo (segundos):</label>
                     <div class="slider-container">
-                        <input type="range" id="interval" min="60" max="300" value="60" step="10">
+                        <input type="range" id="interval" min="30" max="300" value="60" step="10">
                         <span id="intervalValue" class="slider-value">60</span>
                     </div>
                 </div>
@@ -66,7 +325,10 @@
                         <span class="btn-icon">🗑️</span>
                         Limpar Log
                     </button>
-
+                    <button id="manualBtn" class="btn btn-accent">
+                        <span class="btn-icon">🎯</span>
+                        Anúncio Manual
+                    </button>
                 </div>
             </section>
 
@@ -154,7 +416,6 @@
         </main>
     </div>
 
-    <script src="session-security.js"></script>
     <script src="pix-script.js"></script>
 </body>
 </html>
