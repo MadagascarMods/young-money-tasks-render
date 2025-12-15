@@ -148,24 +148,11 @@
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
             </div>
-            <h2 style="margin: 0 0 15px 0; color: #1f2937; font-size: 24px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sistema Resetado</h2>
-            <p style="margin: 0 0 25px 0; color: #6b7280; font-size: 15px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-              Redirecionando em <span id="countdownTimer" style="font-weight: 700; color: #3b82f6; font-size: 18px;">${countdown}</span> segundos...
-            </p>
-            <button id="resetLoginBtn" style="
-              background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-              color: white !important;
-              border: none !important;
-              padding: 14px 35px !important;
-              border-radius: 10px !important;
-              font-size: 16px !important;
-              font-weight: 600 !important;
-              cursor: pointer !important;
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-              transition: transform 0.2s, box-shadow 0.2s !important;
-            ">
-              Voltar para Tarefas
-            </button>
+            <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sistema Resetado</h2>
+            <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); padding: 20px 30px; border-radius: 12px; margin-top: 10px;">
+              <p style="margin: 0 0 8px 0; color: rgba(255,255,255,0.9); font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Redirecionando em</p>
+              <span id="countdownTimer" style="font-weight: 700; color: #ffffff; font-size: 48px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: block; line-height: 1;">${countdown}</span>
+            </div>
           `;
           
           overlay.appendChild(messageBox);
@@ -193,12 +180,6 @@
               redirectToTasks();
             }
           }, 1000);
-          
-          // Evento do botão - redirecionar imediatamente
-          document.getElementById('resetLoginBtn').addEventListener('click', function() {
-            clearInterval(countdownInterval);
-            redirectToTasks();
-          });
         }
         
         // Função para iniciar verificação periódica
