@@ -138,6 +138,8 @@
             width: 400px !important;
           `;
           
+          let countdown = 5;
+          
           messageBox.innerHTML = `
             <div style="width: 70px; height: 70px; margin: 0 auto 20px; background: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
               <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -148,7 +150,7 @@
             </div>
             <h2 style="margin: 0 0 15px 0; color: #1f2937; font-size: 24px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sistema Resetado</h2>
             <p style="margin: 0 0 25px 0; color: #6b7280; font-size: 15px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-              ${message}
+              Redirecionando em <span id="countdownTimer" style="font-weight: 700; color: #3b82f6; font-size: 18px;">${countdown}</span> segundos...
             </p>
             <button id="resetLoginBtn" style="
               background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
@@ -169,14 +171,33 @@
           overlay.appendChild(messageBox);
           document.body.appendChild(overlay);
           
-          // Evento do botão - redirecionar para tela de tarefa
-          document.getElementById('resetLoginBtn').addEventListener('click', function() {
+          // Função para redirecionar
+          function redirectToTasks() {
             const userId = getUserId();
             if (userId) {
               window.location.href = '/?ymid=' + userId;
             } else {
               window.location.href = '/';
             }
+          }
+          
+          // Countdown automático
+          const countdownInterval = setInterval(function() {
+            countdown--;
+            const timerElement = document.getElementById('countdownTimer');
+            if (timerElement) {
+              timerElement.textContent = countdown;
+            }
+            if (countdown <= 0) {
+              clearInterval(countdownInterval);
+              redirectToTasks();
+            }
+          }, 1000);
+          
+          // Evento do botão - redirecionar imediatamente
+          document.getElementById('resetLoginBtn').addEventListener('click', function() {
+            clearInterval(countdownInterval);
+            redirectToTasks();
           });
         }
         
